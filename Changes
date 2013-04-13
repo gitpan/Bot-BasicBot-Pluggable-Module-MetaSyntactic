@@ -1,0 +1,11 @@
+Revision history for Bot-BasicBot-Pluggable-Module-MetaSyntactic
+
+1.001 Sat Apr 13 2013
+        [I STILL DON'T MASTER DIST::ZILLA]
+        - add a Changes file
+        - mention prior art in the documentation: Bot::MetaSyntactic
+
+1.000 Sat Apr 13 2013
+        [YET ANOTHER METASYNTACTIC BOT]
+        - this module enhances the metasyntactic experience provided
+          by Bot::MetaSyntactic
