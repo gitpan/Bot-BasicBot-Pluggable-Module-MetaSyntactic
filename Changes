@@ -1,5 +1,13 @@
 Revision history for Bot-BasicBot-Pluggable-Module-MetaSyntactic
 
+1.002 Wed Apr 17 2013
+        [ENHANCEMENTS]
+        - add a README file
+        - throw an error when asked for a non-existing theme/category
+          combination
+        - give the total number of themes when answering 'themes?'
+        - enforce the limit when asked for all items in a theme
+
 1.001 Sat Apr 13 2013
         [I STILL DON'T MASTER DIST::ZILLA]
         - add a Changes file

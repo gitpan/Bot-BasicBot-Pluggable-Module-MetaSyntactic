@@ -1,4 +1,7 @@
 package Bot::BasicBot::Pluggable::Module::MetaSyntactic;
+{
+  $Bot::BasicBot::Pluggable::Module::MetaSyntactic::VERSION = '1.002';
+}
 
 use strict;
 use warnings;
@@ -8,7 +11,9 @@ use Acme::MetaSyntactic ();
 use Text::Wrap;
 
 our @ISA     = qw(Bot::BasicBot::Pluggable::Module);
-our $VERSION = '0.01';
+
+my $META = Acme::MetaSyntactic->new()
+    or carp "fatal: Can't create new Acme::MetaSyntactic object";
 
 sub init {
     my $self = shift;
@@ -19,10 +24,6 @@ sub init {
     };
 
     $Text::Wrap::columns = $self->{meta}{wrap};
-
-    $self->{meta}{main} = Acme::MetaSyntactic->new()
-        or carp "fatal: Can't create new Acme::MetaSyntactic object"
-        and return undef;
 }
 
 sub told {
@@ -56,22 +57,39 @@ sub told {
         my ( $theme, $category ) = split m'/', $command, 2;
         $self->{meta}{theme}{$command} //= _load_theme($theme, $category);
         return "No such theme: $theme"
-            if !$self->{meta}{main}->has_theme($theme);
+            if !$META->has_theme($theme);
+        if ( $category && $self->{meta}{theme}{$command}
+            ->isa('Acme::MetaSyntactic::MultiList')
+            && !grep { $_ eq $category }
+            $self->{meta}{theme}{$command}->categories )
+        {
+            delete $self->{meta}{theme}{$command};
+            return "No such theme/category: $theme/$category";
+        }
         my $num = 0 + ( shift @args // 1 );
+
+        # enforce the limit if explicitely asked for more
+        $num //= 1;
         $num = $self->{meta}{limit} if $num > $self->{meta}{limit};
-        return join ' ', $self->{meta}{theme}{$command}->name($num);
+
+        my $meta  = $self->{meta}{theme}{$command};
+        my @items = $meta->name($num);
+        splice @items, $self->{meta}{limit}    # enforce the limit
+            if @items > $self->{meta}{limit};
+        return join ' ', @items;
     }
 
     # it's a command
     elsif ( $command eq 'themes?' ) {
-        return join ' ', 'Available themes:', $self->{meta}{main}->themes();
+        my @themes = $META->themes();
+        return join ' ', scalar @themes, 'themes available:', @themes;
     }
     elsif ( $command eq 'categories?' ) {
         return if !@args;
         my $theme = shift @args;
         $self->{meta}{theme}{$theme} //= _load_theme($theme);
         return "No such theme: $theme"
-            if !$self->{meta}{main}->has_theme($theme);
+            if !$META->has_theme($theme);
         return "Theme $theme does not have any categories"
             if !$self->{meta}{theme}{$theme}
                 ->isa('Acme::MetaSyntactic::MultiList');
@@ -83,7 +101,7 @@ sub told {
 sub _load_theme {
     my ($theme, $category) = @_;
     my $module = "Acme::MetaSyntactic::$theme";
-    return eval "require $module"
+    return eval "require $module" || $META->has_theme($theme)
         ? $module->new( ( category => $category ) x !!$category )
         : '';
 }
@@ -104,7 +122,7 @@ Bot::BasicBot::Pluggable::Module::MetaSyntactic - IRC frontend to Acme::MetaSynt
 
 =head1 VERSION
 
-version 1.001
+version 1.002
 
 =head1 SYNOPSIS
 

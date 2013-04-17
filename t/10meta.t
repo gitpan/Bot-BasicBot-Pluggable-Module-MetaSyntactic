@@ -131,7 +131,7 @@ my @tests = (
             'channel'  => 'msg',
             'raw_body' => 'meta themes?',
             '_nick'    => 'bam',
-        } => join( ' ', 'Available themes:', Acme::MetaSyntactic->themes )
+        } => join( ' ', 1 + Acme::MetaSyntactic->themes, 'themes available:', sort bbpmm_theme => Acme::MetaSyntactic->themes )
     ],
     [   {   'body'     => 'meta this_theme_does_not_exist',
             'raw_nick' => 'BooK!~book@d83-179-185-40.cust.tele2.fr',
@@ -178,12 +178,33 @@ my @tests = (
             '_nick'    => 'bam',
         } => 'No such theme: this_theme_does_not_exist'
     ],
+    [   {   'body'     => 'meta foo/de 3',
+            'raw_nick' => 'BooK!~book@d83-179-185-40.cust.tele2.fr',
+            'who'      => 'BooK',
+            'address'  => 'msg',
+            'channel'  => 'msg',
+            'raw_body' => 'meta foo/de 3',
+            '_nick'    => 'bam',
+        } => 'No such theme/category: foo/de'
+    ],
+    [   {   'body'     => 'meta bbpmm_theme 0',
+            'raw_nick' => 'BooK!~book@d83-179-185-40.cust.tele2.fr',
+            'who'      => 'BooK',
+            'address'  => 'msg',
+            'channel'  => 'msg',
+            'raw_body' => 'meta bbpmm_theme 0',
+            '_nick'    => 'bam',
+        } => join ' ', (sort 'a'..'dx')[0..99]
+    ],
 );
 
 plan tests => @tests + 1;
 
 my $bot = Bot::BasicBot::Pluggable::Module::MetaSyntactic->new;
 $ENV{LANGUAGE} = 'en';
+
+# a special test theme
+Acme::MetaSyntactic->add_theme( 'bbpmm_theme' => [ 'a' .. 'dx' ] );
 
 # quick test of the help string
 like( $bot->help(), qr/meta theme/, 'Basic usage line' );
