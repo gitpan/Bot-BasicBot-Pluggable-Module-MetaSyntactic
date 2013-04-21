@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Module::MetaSyntactic;
 {
-  $Bot::BasicBot::Pluggable::Module::MetaSyntactic::VERSION = '1.002';
+  $Bot::BasicBot::Pluggable::Module::MetaSyntactic::VERSION = '1.003';
 }
 
 use strict;
@@ -66,14 +66,29 @@ sub told {
             delete $self->{meta}{theme}{$command};
             return "No such theme/category: $theme/$category";
         }
-        my $num = 0 + ( shift @args // 1 );
+
+        # compute the list of items
+        my ( $num, $re );
+        for my $arg (@args) {
+            if ( $arg =~ /^[0-9]+$/ ) { $num //= $arg; }
+            elsif ( $arg =~ m{^/([^\/]*)/$} ) {
+                $re = eval {qr/$1/}
+                    or do { ( my $err = $@ ) =~ s/ at .*//s; return $err; }
+            }
+            else {return}    # can't parse this argument
+        }
 
         # enforce the limit if explicitely asked for more
         $num //= 1;
         $num = $self->{meta}{limit} if $num > $self->{meta}{limit};
 
         my $meta  = $self->{meta}{theme}{$command};
-        my @items = $meta->name($num);
+        my @items = $meta->name( $re ? 0 : $num );
+        if ($re) {    # NOTE: the extra loop is never run if $num == 0
+            @items = grep /$re/, @items;
+            splice @items, $num if $num && @items > $num;
+            push @items, grep /$re/, $meta->name(0) while @items < $num;
+        }
         splice @items, $self->{meta}{limit}    # enforce the limit
             if @items > $self->{meta}{limit};
         return join ' ', @items;
@@ -122,7 +137,7 @@ Bot::BasicBot::Pluggable::Module::MetaSyntactic - IRC frontend to Acme::MetaSynt
 
 =head1 VERSION
 
-version 1.002
+version 1.003
 
 =head1 SYNOPSIS
 

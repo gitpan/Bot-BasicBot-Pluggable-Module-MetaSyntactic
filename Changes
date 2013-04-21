@@ -1,5 +1,9 @@
 Revision history for Bot-BasicBot-Pluggable-Module-MetaSyntactic
 
+1.003 Mon Apr 22 2013
+        [ENHANCEMENTS]
+        - add support for filtering results using a regular expression
+
 1.002 Wed Apr 17 2013
         [ENHANCEMENTS]
         - add a README file
