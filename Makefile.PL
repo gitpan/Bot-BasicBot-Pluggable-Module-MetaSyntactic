@@ -12,6 +12,7 @@ my %WriteMakefileArgs = (
   "ABSTRACT" => "IRC frontend to Acme::MetaSyntactic",
   "AUTHOR" => "Philippe Bruhat (BooK) <book\@cpan.org>",
   "BUILD_REQUIRES" => {
+    "Acme::MetaSyntactic::MultiList" => 0,
     "File::Find" => 0,
     "List::Util" => 0,
     "Test::More" => "0.88"
@@ -31,7 +32,7 @@ my %WriteMakefileArgs = (
     "strict" => 0,
     "warnings" => 0
   },
-  "VERSION" => "1.003",
+  "VERSION" => "1.004",
   "test" => {
     "TESTS" => "t/*.t"
   }

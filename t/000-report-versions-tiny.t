@@ -49,6 +49,7 @@ sub pmver {
 }
 
 eval { $v .= pmver('Acme::MetaSyntactic','any version') };
+eval { $v .= pmver('Acme::MetaSyntactic::MultiList','any version') };
 eval { $v .= pmver('Bot::BasicBot::Pluggable::Module','any version') };
 eval { $v .= pmver('Carp','any version') };
 eval { $v .= pmver('ExtUtils::MakeMaker','6.30') };

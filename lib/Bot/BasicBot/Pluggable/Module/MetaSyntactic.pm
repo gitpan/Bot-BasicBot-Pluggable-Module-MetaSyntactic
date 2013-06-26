@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Module::MetaSyntactic;
 {
-  $Bot::BasicBot::Pluggable::Module::MetaSyntactic::VERSION = '1.003';
+  $Bot::BasicBot::Pluggable::Module::MetaSyntactic::VERSION = '1.004';
 }
 
 use strict;
@@ -53,7 +53,7 @@ sub told {
     return if !$command || !length $command;
 
     # it's a theme
-    if ( $command =~ /^[\w\/]+$/ ) {
+    if ( $command =~ /^[-\w\/]+$/ ) {
         my ( $theme, $category ) = split m'/', $command, 2;
         $self->{meta}{theme}{$command} //= _load_theme($theme, $category);
         return "No such theme: $theme"
@@ -87,7 +87,8 @@ sub told {
         if ($re) {    # NOTE: the extra loop is never run if $num == 0
             @items = grep /$re/, @items;
             splice @items, $num if $num && @items > $num;
-            push @items, grep /$re/, $meta->name(0) while @items < $num;
+            push @items, grep /$re/, $meta->name(0)
+                while @items && @items < $num;
         }
         splice @items, $self->{meta}{limit}    # enforce the limit
             if @items > $self->{meta}{limit};
@@ -137,7 +138,7 @@ Bot::BasicBot::Pluggable::Module::MetaSyntactic - IRC frontend to Acme::MetaSynt
 
 =head1 VERSION
 
-version 1.003
+version 1.004
 
 =head1 SYNOPSIS
 
@@ -162,7 +163,7 @@ These commands return items from L<Acme::MetaSyntactic> themes.
 
 =over 4
 
-=item C<< meta <theme> [ <count> ] >>
+=item C<< meta <theme> [ <count> ] [ /regexp/ ] >>
 
 return one or more items from the theme.
 
@@ -171,12 +172,7 @@ is exhausted.
 
 This will pick the default category if the theme has multiple categories.
 
-If I<count> is C<0>, then the whole list if returned (which does not
-disturb the partially consumed list from the non-zero use case).
-Note that there is a limit to the number of items returned, so that the
-bot does not accidentaly spam a channel.
-
-=item C<< meta <theme>/<category> [ <count> ] >>
+=item C<< meta <theme>/<category> [ <count> ] [ /regexp/ ] >>
 
 return one or more items from the theme sub-categories.
 
@@ -184,6 +180,16 @@ The bot maintains state for each theme/category, so items can be picked
 from sub-categories of the same theme independently.
 
 =back
+
+If I<count> is C<0>, then the whole list if returned (which does not
+disturb the partially consumed list from the non-zero use case).
+Note that there is a limit to the number of items returned, so that the
+bot does not accidentaly spam a channel.
+
+If a I</regexp/> is given, only items that match the regular expression
+will be shown. With a I<count> of C<0>, I<all> matching items are
+returned.  The filtering is done on the whole list, so it has no influence
+on the state of non-filtered request (with regard to repetition).
 
 =head2 Meta (sic) commands
 
@@ -197,7 +203,7 @@ return the list of available themes.
 
 =item C<meta categories? I<theme>>
 
-return the list of categories of the given theme.
+return the list of categories for the given theme.
 
 =back
 

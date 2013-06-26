@@ -5,7 +5,7 @@ use Bot::BasicBot::Pluggable::Module::MetaSyntactic;
 my $nick;
 
 # "alter" the shuffle method
-{
+BEGIN {
     no warnings;
     my ( $i, $j ) = ( 0, 0 );
     *List::Util::shuffle = sub { sort @_ };    # item selection
@@ -24,6 +24,24 @@ my $nick;
     sub ignore_nick { $_[1] eq 'ignore_me' }
     sub nick {$nick}
 }
+
+# add a theme with a category having a dash in its name
+package Acme::MetaSyntactic::bbpmm_category;
+use Acme::MetaSyntactic::MultiList;
+our @ISA = ('Acme::MetaSyntactic::MultiList');
+__PACKAGE__->init(
+    {   default => 'basic',
+        names   => {
+            'x-dashed' => "Saturn Earth Neptune",
+            basic      => "ununoctium manganese thallium",
+        }
+    }
+);
+
+# this is so ugly...
+$Acme::MetaSyntactic::META{bbpmm_category} = 1;
+
+package main;
 
 # test the told() method
 my @tests = (
@@ -231,6 +249,42 @@ my @tests = (
             'raw_body' => 'meta: foo /^ba/ 0',
             '_nick'    => 'bam',
         } => 'bar baz'
+    ],
+    [   {   'body'     => 'meta: foo /^ba/ 4',
+            'raw_nick' => 'BooK!~book@d83-179-185-40.cust.tele2.fr',
+            'who'      => 'BooK',
+            'address'  => 'msg',
+            'channel'  => 'msg',
+            'raw_body' => 'meta: foo /^ba/ 4',
+            '_nick'    => 'bam',
+        } => 'bar baz bar baz'
+    ],
+    [   {   'body'     => 'meta: foo /v/ 0',
+            'raw_nick' => 'BooK!~book@d83-179-185-40.cust.tele2.fr',
+            'who'      => 'BooK',
+            'address'  => 'msg',
+            'channel'  => 'msg',
+            'raw_body' => 'meta: foo /v/ 0',
+            '_nick'    => 'bam',
+        } => ''
+    ],
+    [   {   'body'     => 'meta: foo /v/',
+            'raw_nick' => 'BooK!~book@d83-179-185-40.cust.tele2.fr',
+            'who'      => 'BooK',
+            'address'  => 'msg',
+            'channel'  => 'msg',
+            'raw_body' => 'meta: foo /v/',
+            '_nick'    => 'bam',
+        } => ''
+    ],
+    [   {   'body'     => 'meta: foo /v/ 4',
+            'raw_nick' => 'BooK!~book@d83-179-185-40.cust.tele2.fr',
+            'who'      => 'BooK',
+            'address'  => 'msg',
+            'channel'  => 'msg',
+            'raw_body' => 'meta: foo /v/ 4',
+            '_nick'    => 'bam',
+        } => ''
     ],
     [   {   'body'     => 'meta: foo /*bar/ 0',
             'raw_nick' => 'BooK!~book@d83-179-185-40.cust.tele2.fr',
